@@ -6,6 +6,17 @@ A drag-and-drop "fill in the table" study game for any table of data. Open `inde
 - **⬇️ Download JSON** saves the current table, which is handy as a starting template.
 - **↩ Sample Data** restores the built-in example.
 
+## Designing tables
+
+Open `instructor.html` (or follow **✏️ Edit in designer** from the game) to build a table without writing JSON:
+
+- Edit cells directly. **➗** splits a row into sub-rows, and the **Row** buttons move, duplicate or delete rows.
+- Each column header has its name, the **Spans sub-rows** (`group`) and **Reusable answers** (`reusable`) options, and an optional width and alignment.
+- **📂 Import JSON** and **⬇️ Export JSON** read and write the format below. **▶ Play** opens the game with the current table.
+- Work in progress is saved in the browser automatically.
+
+`dataset.js` holds the sample table and the validation code that both pages share, so keep it next to the two HTML files.
+
 ## JSON format
 
 Only `columns` and `rows` are required.

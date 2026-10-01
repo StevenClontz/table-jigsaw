@@ -86,6 +86,15 @@
             box-shadow: 0 6px 20px rgba(255, 107, 157, 0.6);
         }
         
+        button:nth-of-type(1) {
+            background: linear-gradient(135deg, #475fff 0%, #5c92ff 100%);
+            box-shadow: 0 4px 15px rgba(71, 135, 255, 0.4);
+        }
+        
+        button:nth-of-type(1):hover {
+            box-shadow: 0 6px 20px rgba(71, 154, 255, 0.6);
+        }
+        
         button:nth-of-type(2) {
             background: linear-gradient(135deg, #FFB347 0%, #FFCC5C 100%);
             box-shadow: 0 4px 15px rgba(255, 179, 71, 0.4);
@@ -400,6 +409,17 @@
             color: #666;
         }
 
+        .designer-link {
+            align-self: center;
+            color: #667eea;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        
+        .designer-link:hover {
+            text-decoration: underline;
+        }
+        
         body.file-drag-over .container {
             outline: 4px dashed #667eea;
             outline-offset: -10px;
@@ -418,6 +438,7 @@
             <button onclick="document.getElementById('fileInput').click()">📂 Load JSON</button>
             <button onclick="downloadDataset()">⬇️ Download JSON</button>
             <button onclick="useSampleData()">↩ Sample Data</button>
+            <a class="designer-link" href="instructor.html">✏️ Edit in designer</a>
             <input type="file" id="fileInput" accept=".json,application/json" hidden>
         </div>
 
@@ -460,104 +481,19 @@
         <div class="source" id="source"></div>
     </div>
 
+    <script src="dataset.js"></script>
     <script>
-        const SAMPLE_DATASET = {
-            title: "World Capitals",
-            instructions: "Drag and drop the answer options to fill in the blanks.",
-            columns: [
-                { key: "country", label: "Country", width: "25%", group: true },
-                { key: "continent", label: "Continent", width: "20%", group: true, reusable: true },
-                { key: "city", label: "City", width: "25%" },
-                { key: "role", label: "Role", width: "30%", reusable: true }
-            ],
-            rows: [
-                { country: "France", continent: "Europe", city: "Paris", role: "Capital" },
-                {
-                    country: "South Africa", continent: "Africa",
-                    subrows: [
-                        { city: "Pretoria", role: "Executive capital" },
-                        { city: "Cape Town", role: "Legislative capital" },
-                        { city: "Bloemfontein", role: "Judicial capital" }
-                    ]
-                },
-                { country: "Japan", continent: "Asia", city: "Tokyo", role: "Capital" },
-                {
-                    country: "Bolivia", continent: "South America",
-                    subrows: [
-                        { city: "Sucre", role: "Constitutional capital" },
-                        { city: "La Paz", role: "Seat of government" }
-                    ]
-                },
-                { country: "Kenya", continent: "Africa", city: "Nairobi", role: "Capital" },
-                { country: "Canada", continent: "North America", city: "Ottawa", role: "Capital" },
-                {
-                    country: "Netherlands", continent: "Europe",
-                    subrows: [
-                        { city: "Amsterdam", role: "Constitutional capital" },
-                        { city: "The Hague", role: "Seat of government" }
-                    ]
-                },
-                { country: "Australia", continent: "Oceania", city: "Canberra", role: "Capital" }
-            ]
-        };
-
         const DEFAULT_DIFFICULTY = {
             easy: { min: 0.15, max: 0.25 },
             medium: { min: 0.30, max: 0.40 },
             hard: { min: 0.50, max: 0.60 },
             expert: { min: 0.70, max: 0.80 }
         };
-        const STORAGE_KEY = 'tableJigsaw.dataset';
 
         let currentDataset = null;
         let blanks = new Set();
         let currentDifficulty = 'medium';
         const answers = {};
-
-        function validateDataset(ds) {
-            if (!ds || typeof ds !== 'object' || Array.isArray(ds)) {
-                throw new Error('The JSON must be an object with "columns" and "rows".');
-            }
-            if (!Array.isArray(ds.columns) || ds.columns.length === 0) {
-                throw new Error('"columns" must be a non-empty array.');
-            }
-            const keys = new Set();
-            ds.columns.forEach((col, i) => {
-                if (!col || typeof col.key !== 'string' || !col.key) {
-                    throw new Error(`Column ${i + 1} needs a string "key".`);
-                }
-                if (keys.has(col.key)) {
-                    throw new Error(`Duplicate column key "${col.key}".`);
-                }
-                keys.add(col.key);
-            });
-            if (!Array.isArray(ds.rows) || ds.rows.length === 0) {
-                throw new Error('"rows" must be a non-empty array.');
-            }
-            const checkValue = (value, where) => {
-                if (value !== undefined && typeof value !== 'string' && typeof value !== 'number') {
-                    throw new Error(`${where} must be a string or number.`);
-                }
-            };
-            ds.rows.forEach((row, r) => {
-                if (!row || typeof row !== 'object') {
-                    throw new Error(`Row ${r + 1} must be an object.`);
-                }
-                if (row.subrows !== undefined && (!Array.isArray(row.subrows) || row.subrows.length === 0)) {
-                    throw new Error(`Row ${r + 1}: "subrows" must be a non-empty array.`);
-                }
-                ds.columns.forEach(col => {
-                    if (col.group || !row.subrows) {
-                        checkValue(row[col.key], `Row ${r + 1}, column "${col.key}"`);
-                    } else {
-                        row.subrows.forEach((sub, s) => {
-                            checkValue(sub && sub[col.key], `Row ${r + 1}, subrow ${s + 1}, column "${col.key}"`);
-                        });
-                    }
-                });
-            });
-            return ds;
-        }
 
         function getSubrows(row) {
             return row.subrows || [row];
@@ -959,18 +895,7 @@
         }
 
         function downloadDataset() {
-            const json = JSON.stringify(currentDataset, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            const slug = (currentDataset.title || 'table-jigsaw').toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'table-jigsaw';
-            a.href = url;
-            a.download = `${slug}.json`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
+            downloadJSON(currentDataset, currentDataset.title);
         }
 
         function useSampleData() {

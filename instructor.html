@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table Jigsaw Designer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #1F4E78;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .instructions {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 1em;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            font-family: inherit;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button.play-btn {
+            background: linear-gradient(135deg, #FF6B9D 0%, #FFA07A 100%);
+            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4);
+        }
+
+        button.icon-btn {
+            background: white;
+            color: #1F4E78;
+            border: 1px solid #8B9FE8;
+            box-shadow: none;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        button.icon-btn:hover {
+            background: #E3F2FD;
+            transform: none;
+            box-shadow: none;
+        }
+
+        button.icon-btn:disabled {
+            opacity: 0.35;
+            cursor: default;
+            background: white;
+        }
+
+        .game-link {
+            color: #667eea;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .game-link:hover {
+            text-decoration: underline;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .details label {
+            display: block;
+            font-weight: bold;
+            color: #1F4E78;
+            font-size: 14px;
+        }
+
+        .details input {
+            display: block;
+            width: 100%;
+            margin-top: 4px;
+            padding: 8px 12px;
+            border: 2px solid #c3cfe2;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .details input:focus, td textarea:focus, th input:focus, th select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .feedback {
+            text-align: center;
+            margin: 0 auto 15px;
+            padding: 12px 20px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            display: none;
+            max-width: 800px;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.success {
+            background: linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 100%);
+            color: #2E7D32;
+        }
+
+        .feedback.error {
+            background: linear-gradient(135deg, #FFCDD2 0%, #EF9A9A 100%);
+            color: #C62828;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background: linear-gradient(135deg, #1F4E78 0%, #2d5f8d 100%);
+            color: white;
+            padding: 10px 8px;
+            border: 1px solid #1a3d5f;
+            font-size: 12px;
+            font-weight: normal;
+            vertical-align: top;
+            min-width: 170px;
+        }
+
+        th.actions-col {
+            min-width: 0;
+            width: 1%;
+            vertical-align: middle;
+            text-align: center;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        th .col-label {
+            width: 100%;
+            padding: 6px 8px;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .col-opts {
+            margin-top: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .col-opts label {
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .col-opts .col-layout {
+            display: flex;
+            gap: 4px;
+        }
+
+        .col-opts .col-layout input, .col-opts .col-layout select {
+            min-width: 0;
+            flex: 1;
+            padding: 2px 4px;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 12px;
+        }
+
+        .col-actions {
+            margin-top: 6px;
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        td {
+            padding: 6px;
+            border: 1px solid #999;
+            background-color: #B4C6E7;
+            vertical-align: top;
+        }
+
+        td.group-cell {
+            background-color: #9DB4DE;
+            vertical-align: middle;
+        }
+
+        td.actions-cell {
+            background-color: #f5f7fa;
+            white-space: nowrap;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        td.actions-cell button + button {
+            margin-left: 3px;
+        }
+
+        tr.row-start td {
+            border-top: 3px solid #1F4E78;
+        }
+
+        td textarea {
+            display: block;
+            width: 100%;
+            min-height: 34px;
+            padding: 6px 8px;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.85);
+            font-family: inherit;
+            font-size: 13px;
+            resize: none;
+            overflow: hidden;
+            field-sizing: content;
+        }
+
+        .bottom-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .help {
+            margin-top: 25px;
+            padding: 15px 20px;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .help li {
+            margin-left: 20px;
+        }
+
+        body.file-drag-over .container {
+            outline: 4px dashed #667eea;
+            outline-offset: -10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✏️ Table Jigsaw Designer</h1>
+        <div class="instructions">Build a table for the Table Jigsaw game, then export it as JSON or play it right away.</div>
+
+        <div class="controls">
+            <button onclick="document.getElementById('fileInput').click()">📂 Import JSON</button>
+            <button onclick="exportDataset()">⬇️ Export JSON</button>
+            <button class="play-btn" onclick="playDataset()">▶ Play</button>
+            <button onclick="newTable()">📄 New Table</button>
+            <button onclick="useSampleData()">↩ Sample Data</button>
+            <a class="game-link" href="index.html">🧩 Back to game</a>
+            <input type="file" id="fileInput" accept=".json,application/json" hidden>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <div class="details">
+            <label>Title <input id="metaTitle" data-meta="title" placeholder="Table Jigsaw"></label>
+            <label>Instructions <input id="metaInstructions" data-meta="instructions" placeholder="Drag and drop the answer options to fill in the blanks."></label>
+            <label>Source <input id="metaSource" data-meta="source" placeholder="Optional citation"></label>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="bottom-controls">
+            <button onclick="addRow()">+ Row</button>
+            <button onclick="addColumn()">+ Column</button>
+        </div>
+
+        <div class="help">
+            <strong>Tips</strong>
+            <ul>
+                <li>Click any cell to edit it. Press Enter for a line break.</li>
+                <li><strong>➗</strong> splits a row by adding a sub-row below; <strong>✕</strong> removes a sub-row.</li>
+                <li><strong>Spans sub-rows</strong> shows one value across all of a row's sub-rows (darker cells).</li>
+                <li><strong>Reusable answers</strong> lets one answer chip fill several blanks, e.g. a repeated category.</li>
+                <li>Your work is saved in this browser automatically. Drop a <code>.json</code> file on the page to import it.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="dataset.js"></script>
+    <script>
+        const DRAFT_KEY = 'tableJigsaw.draft';
+
+        // Editor model. Columns have a stable internal id, so renaming a label never loses data.
+        // Each row is { values: {colId: text} for group columns, subrows: [{colId: text}] } with >= 1 subrow.
+        let meta = { title: '', instructions: '', source: '' };
+        let extras = {};
+        let columns = [];
+        let rows = [];
+        let nextColumnId = 1;
+
+        function toText(value) {
+            return value === undefined || value === null ? '' : String(value);
+        }
+
+        function fromDataset(ds) {
+            validateDataset(ds);
+            const { title, instructions, source, columns: cols, rows: dsRows, ...rest } = ds;
+            meta = { title: toText(title), instructions: toText(instructions), source: toText(source) };
+            extras = JSON.parse(JSON.stringify(rest));
+            columns = cols.map(c => ({
+                id: nextColumnId++,
+                key: c.key,
+                label: toText(c.label || c.key),
+                group: !!c.group,
+                reusable: !!c.reusable,
+                width: toText(c.width),
+                align: toText(c.align)
+            }));
+            rows = dsRows.map(r => {
+                const values = {};
+                columns.filter(c => c.group).forEach(c => { values[c.id] = toText(r[c.key]); });
+                const subrows = (r.subrows || [r]).map(s => {
+                    const sub = {};
+                    columns.filter(c => !c.group).forEach(c => { sub[c.id] = toText(s[c.key]); });
+                    return sub;
+                });
+                return { values, subrows };
+            });
+        }
+
+        function slugify(text) {
+            return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        }
+
+        function columnKeys() {
+            // Imported columns keep their keys; new columns get a unique key from their label
+            const keys = new Map();
+            const used = new Set();
+            columns.filter(c => c.key).forEach(c => {
+                keys.set(c.id, c.key);
+                used.add(c.key);
+            });
+            columns.filter(c => !c.key).forEach(c => {
+                const base = slugify(c.label) || 'column';
+                let key = base;
+                for (let n = 2; used.has(key); n++) key = `${base}-${n}`;
+                used.add(key);
+                keys.set(c.id, key);
+            });
+            return keys;
+        }
+
+        function toDataset() {
+            const keys = columnKeys();
+            const groupCols = columns.filter(c => c.group);
+            const subCols = columns.filter(c => !c.group);
+            const subrowObject = sub => {
+                const o = {};
+                subCols.forEach(c => { o[keys.get(c.id)] = sub[c.id] || ''; });
+                return o;
+            };
+
+            const ds = { ...JSON.parse(JSON.stringify(extras)) };
+            if (meta.title.trim()) ds.title = meta.title;
+            if (meta.instructions.trim()) ds.instructions = meta.instructions;
+            if (meta.source.trim()) ds.source = meta.source;
+            ds.columns = columns.map(c => {
+                const col = { key: keys.get(c.id), label: c.label };
+                if (c.width.trim()) col.width = c.width.trim();
+                if (c.align) col.align = c.align;
+                if (c.group) col.group = true;
+                if (c.reusable) col.reusable = true;
+                return col;
+            });
+            ds.rows = rows.map(r => {
+                const row = {};
+                groupCols.forEach(c => { row[keys.get(c.id)] = r.values[c.id] || ''; });
+                if (r.subrows.length === 1) {
+                    Object.assign(row, subrowObject(r.subrows[0]));
+                } else {
+                    row.subrows = r.subrows.map(subrowObject);
+                }
+                return row;
+            });
+            return ds;
+        }
+
+        function showFeedback(message, kind, hideAfter) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = `feedback show ${kind}`;
+            clearTimeout(showFeedback.timer);
+            if (hideAfter) {
+                showFeedback.timer = setTimeout(() => feedback.classList.remove('show'), hideAfter);
+            }
+        }
+
+        // Saving
+        function saveDraft() {
+            try {
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(toDataset()));
+            } catch (e) {
+                // Storage unavailable (private mode, quota); the draft just won't persist
+            }
+        }
+
+        function loadDraft() {
+            try {
+                const saved = localStorage.getItem(DRAFT_KEY);
+                if (saved) return validateDataset(JSON.parse(saved));
+            } catch (e) {
+                // Ignore a corrupt draft
+            }
+            return null;
+        }
+
+        function changed() {
+            saveDraft();
+        }
+
+        // Rendering
+        function autosize(textarea) {
+            textarea.style.height = 'auto';
+            if (textarea.scrollHeight) textarea.style.height = `${textarea.scrollHeight + 4}px`;
+        }
+
+        function iconButton(label, title, onClick, disabled) {
+            const button = document.createElement('button');
+            button.className = 'icon-btn';
+            button.type = 'button';
+            button.textContent = label;
+            button.title = title;
+            button.disabled = !!disabled;
+            button.addEventListener('click', onClick);
+            return button;
+        }
+
+        function cellEditor(store, colId) {
+            const textarea = document.createElement('textarea');
+            textarea.rows = 1;
+            textarea.value = store[colId] || '';
+            textarea.addEventListener('input', () => {
+                store[colId] = textarea.value;
+                autosize(textarea);
+                changed();
+            });
+            return textarea;
+        }
+
+        function renderMeta() {
+            document.querySelectorAll('[data-meta]').forEach(input => {
+                input.value = meta[input.dataset.meta];
+            });
+        }
+
+        function renderHead() {
+            const thead = document.getElementById('tableHead');
+            thead.innerHTML = '';
+            const tr = document.createElement('tr');
+
+            const rowActions = document.createElement('th');
+            rowActions.className = 'actions-col';
+            rowActions.textContent = 'Row';
+            tr.appendChild(rowActions);
+
+            columns.forEach((col, colIdx) => {
+                const th = document.createElement('th');
+
+                const label = document.createElement('input');
+                label.className = 'col-label';
+                label.value = col.label;
+                label.placeholder = 'Column name';
+                label.addEventListener('input', () => { col.label = label.value; changed(); });
+                th.appendChild(label);
+
+                const opts = document.createElement('div');
+                opts.className = 'col-opts';
+                [['group', 'Spans sub-rows'], ['reusable', 'Reusable answers']].forEach(([opt, text]) => {
+                    const optLabel = document.createElement('label');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = col[opt];
+                    checkbox.dataset.opt = opt;
+                    checkbox.addEventListener('change', () => {
+                        if (opt === 'group') {
+                            setGroup(col, checkbox.checked);
+                        } else {
+                            col.reusable = checkbox.checked;
+                            changed();
+                        }
+                    });
+                    optLabel.append(checkbox, ` ${text}`);
+                    opts.appendChild(optLabel);
+                });
+
+                const layout = document.createElement('div');
+                layout.className = 'col-layout';
+                const width = document.createElement('input');
+                width.value = col.width;
+                width.placeholder = 'width';
+                width.title = 'Column width in the game, e.g. 20%';
+                width.addEventListener('input', () => { col.width = width.value; changed(); });
+                const align = document.createElement('select');
+                align.title = 'Text alignment in the game';
+                [['', 'align'], ['left', 'left'], ['center', 'center'], ['right', 'right']].forEach(([value, text]) => {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = text;
+                    align.appendChild(option);
+                });
+                align.value = col.align;
+                align.addEventListener('change', () => { col.align = align.value; changed(); });
+                layout.append(width, align);
+                opts.appendChild(layout);
+                th.appendChild(opts);
+
+                const actions = document.createElement('div');
+                actions.className = 'col-actions';
+                actions.append(
+                    iconButton('◀', 'Move column left', () => moveColumn(colIdx, -1), colIdx === 0),
+                    iconButton('▶', 'Move column right', () => moveColumn(colIdx, 1), colIdx === columns.length - 1),
+                    iconButton('✕', 'Delete column', () => deleteColumn(colIdx), columns.length === 1)
+                );
+                th.appendChild(actions);
+
+                tr.appendChild(th);
+            });
+
+            const subActions = document.createElement('th');
+            subActions.className = 'actions-col';
+            subActions.textContent = 'Sub-row';
+            tr.appendChild(subActions);
+
+            thead.appendChild(tr);
+        }
+
+        function renderBody() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            rows.forEach((row, rowIdx) => {
+                row.subrows.forEach((sub, subIdx) => {
+                    const tr = document.createElement('tr');
+                    if (subIdx === 0) {
+                        tr.className = 'row-start';
+
+                        const rowActions = document.createElement('td');
+                        rowActions.className = 'actions-cell';
+                        rowActions.rowSpan = row.subrows.length;
+                        rowActions.append(
+                            iconButton('⬆', 'Move row up', () => moveRow(rowIdx, -1), rowIdx === 0),
+                            iconButton('⬇', 'Move row down', () => moveRow(rowIdx, 1), rowIdx === rows.length - 1),
+                            iconButton('⧉', 'Duplicate row', () => duplicateRow(rowIdx)),
+                            iconButton('🗑', 'Delete row', () => deleteRow(rowIdx), rows.length === 1)
+                        );
+                        tr.appendChild(rowActions);
+                    }
+
+                    columns.forEach(col => {
+                        if (col.group && subIdx > 0) return;
+                        const td = document.createElement('td');
+                        if (col.group) {
+                            td.className = 'group-cell';
+                            td.rowSpan = row.subrows.length;
+                        }
+                        td.appendChild(cellEditor(col.group ? row.values : sub, col.id));
+                        tr.appendChild(td);
+                    });
+
+                    const subActions = document.createElement('td');
+                    subActions.className = 'actions-cell';
+                    subActions.append(iconButton('➗', 'Split: add a sub-row below', () => splitRow(rowIdx, subIdx)));
+                    if (row.subrows.length > 1) {
+                        subActions.append(iconButton('✕', 'Remove this sub-row', () => deleteSubrow(rowIdx, subIdx)));
+                    }
+                    tr.appendChild(subActions);
+
+                    tbody.appendChild(tr);
+                });
+            });
+
+            tbody.querySelectorAll('textarea').forEach(autosize);
+        }
+
+        function render() {
+            renderHead();
+            renderBody();
+        }
+
+        function focusCell(rowIdx, subIdx) {
+            // Focus the first editable cell belonging to the given sub-row
+            const trs = document.querySelectorAll('#tableBody tr');
+            let index = 0;
+            for (let r = 0; r < rowIdx; r++) index += rows[r].subrows.length;
+            const tr = trs[index + subIdx];
+            const textarea = tr && tr.querySelector('textarea');
+            if (textarea) textarea.focus();
+        }
+
+        function structureChanged() {
+            changed();
+            render();
+        }
+
+        // Row operations
+        function emptyRow(subrowCount = 1) {
+            return { values: {}, subrows: Array.from({ length: subrowCount }, () => ({})) };
+        }
+
+        function addRow() {
+            rows.push(emptyRow());
+            structureChanged();
+            focusCell(rows.length - 1, 0);
+        }
+
+        function moveRow(rowIdx, delta) {
+            const target = rowIdx + delta;
+            if (target < 0 || target >= rows.length) return;
+            [rows[rowIdx], rows[target]] = [rows[target], rows[rowIdx]];
+            structureChanged();
+        }
+
+        function duplicateRow(rowIdx) {
+            rows.splice(rowIdx + 1, 0, JSON.parse(JSON.stringify(rows[rowIdx])));
+            structureChanged();
+        }
+
+        function rowHasContent(row) {
+            return Object.values(row.values).some(v => v.trim()) ||
+                row.subrows.some(sub => Object.values(sub).some(v => v.trim()));
+        }
+
+        function deleteRow(rowIdx) {
+            if (rows.length === 1) return;
+            if (rowHasContent(rows[rowIdx]) && !confirm('Delete this row and everything in it?')) return;
+            rows.splice(rowIdx, 1);
+            structureChanged();
+        }
+
+        function splitRow(rowIdx, subIdx) {
+            rows[rowIdx].subrows.splice(subIdx + 1, 0, {});
+            structureChanged();
+            focusCell(rowIdx, subIdx + 1);
+        }
+
+        function deleteSubrow(rowIdx, subIdx) {
+            const row = rows[rowIdx];
+            if (row.subrows.length === 1) return;
+            const sub = row.subrows[subIdx];
+            if (Object.values(sub).some(v => v.trim()) && !confirm('Remove this sub-row and its contents?')) return;
+            row.subrows.splice(subIdx, 1);
+            structureChanged();
+        }
+
+        // Column operations
+        function addColumn() {
+            const col = { id: nextColumnId++, key: null, label: `Column ${columns.length + 1}`, group: false, reusable: false, width: '', align: '' };
+            columns.push(col);
+            structureChanged();
+            const labels = document.querySelectorAll('#tableHead .col-label');
+            labels[labels.length - 1].select();
+        }
+
+        function moveColumn(colIdx, delta) {
+            const target = colIdx + delta;
+            if (target < 0 || target >= columns.length) return;
+            [columns[colIdx], columns[target]] = [columns[target], columns[colIdx]];
+            structureChanged();
+        }
+
+        function deleteColumn(colIdx) {
+            if (columns.length === 1) return;
+            const col = columns[colIdx];
+            const hasData = rows.some(r => (r.values[col.id] || '').trim() ||
+                r.subrows.some(sub => (sub[col.id] || '').trim()));
+            if (hasData && !confirm(`Delete the column "${col.label}" and all of its cells?`)) return;
+            columns.splice(colIdx, 1);
+            rows.forEach(r => {
+                delete r.values[col.id];
+                r.subrows.forEach(sub => delete sub[col.id]);
+            });
+            structureChanged();
+        }
+
+        function setGroup(col, on) {
+            if (on === col.group) return;
+            if (on) {
+                const conflicts = rows.some(r =>
+                    new Set(r.subrows.map(sub => (sub[col.id] || '').trim()).filter(v => v)).size > 1);
+                if (conflicts && !confirm(`Some rows have different "${col.label}" values in their sub-rows. ` +
+                    'Spanning keeps only the first non-empty value in each row. Continue?')) {
+                    render();
+                    return;
+                }
+                rows.forEach(r => {
+                    r.values[col.id] = r.subrows.map(sub => sub[col.id] || '').find(v => v.trim()) || '';
+                    r.subrows.forEach(sub => delete sub[col.id]);
+                });
+            } else {
+                rows.forEach(r => {
+                    r.subrows.forEach((sub, subIdx) => { sub[col.id] = subIdx === 0 ? (r.values[col.id] || '') : ''; });
+                    delete r.values[col.id];
+                });
+            }
+            col.group = on;
+            structureChanged();
+        }
+
+        // Whole-table operations
+        function setDataset(ds) {
+            fromDataset(ds);
+            renderMeta();
+            render();
+            saveDraft();
+        }
+
+        function newTable() {
+            if (!confirm('Start a new empty table? Export first if you want to keep the current one.')) return;
+            meta = { title: '', instructions: '', source: '' };
+            extras = {};
+            columns = [1, 2].map(n => ({ id: nextColumnId++, key: null, label: `Column ${n}`, group: false, reusable: false, width: '', align: '' }));
+            rows = [emptyRow(), emptyRow(), emptyRow()];
+            renderMeta();
+            render();
+            saveDraft();
+        }
+
+        function useSampleData() {
+            if (!confirm('Replace the current table with the sample data? Export first if you want to keep it.')) return;
+            setDataset(SAMPLE_DATASET);
+            showFeedback('↩ Sample data loaded', 'success', 3000);
+        }
+
+        function exportDataset() {
+            const ds = toDataset();
+            try {
+                validateDataset(ds);
+            } catch (e) {
+                showFeedback(`⚠️ ${e.message}`, 'error');
+                return;
+            }
+            downloadJSON(ds, ds.title);
+        }
+
+        function playDataset() {
+            const ds = toDataset();
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(ds));
+            } catch (e) {
+                showFeedback('⚠️ Could not hand the table to the game. Export the JSON and load it there instead.', 'error');
+                return;
+            }
+            window.open('index.html', '_blank');
+        }
+
+        function loadFile(file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    setDataset(JSON.parse(reader.result));
+                } catch (e) {
+                    showFeedback(`⚠️ Could not load ${file.name}: ${e.message}`, 'error');
+                    return;
+                }
+                showFeedback(`📂 Loaded ${file.name}`, 'success', 3000);
+            };
+            reader.onerror = () => showFeedback(`⚠️ Could not read ${file.name}`, 'error');
+            reader.readAsText(file);
+        }
+
+        document.querySelectorAll('[data-meta]').forEach(input => {
+            input.addEventListener('input', () => {
+                meta[input.dataset.meta] = input.value;
+                changed();
+            });
+        });
+
+        document.getElementById('fileInput').addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (file) loadFile(file);
+            e.target.value = '';
+        });
+
+        // Drag a .json file anywhere onto the page
+        const isFileDrag = e => e.dataTransfer && Array.from(e.dataTransfer.types).includes('Files');
+        document.addEventListener('dragover', e => {
+            if (!isFileDrag(e)) return;
+            e.preventDefault();
+            document.body.classList.add('file-drag-over');
+        });
+        document.addEventListener('dragleave', e => {
+            if (e.relatedTarget === null) document.body.classList.remove('file-drag-over');
+        });
+        document.addEventListener('drop', e => {
+            if (!isFileDrag(e)) return;
+            e.preventDefault();
+            document.body.classList.remove('file-drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file) loadFile(file);
+        });
+
+        // Initialize with the saved draft, or the sample
+        fromDataset(loadDraft() || SAMPLE_DATASET);
+        renderMeta();
+        render();
+    </script>
+</body>
+</html>
