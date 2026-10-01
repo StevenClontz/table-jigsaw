@@ -20,7 +20,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
-        
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -170,12 +170,20 @@
             border: 1px solid #1a3d5f;
             font-size: 14px;
         }
+
+        tr {
+            background-color: #B4C6E7;
+        }
+
+        tr.alt-row {
+            background-color: #a5bbe5;
+        }
         
         td {
             padding: 12px 8px;
             border: 1px solid #999;
-            background-color: #B4C6E7;
             font-size: 13px;
+            text-align: center
         }
         
         .drop-zone {
@@ -613,6 +621,8 @@
                 const subrows = getSubrows(row);
                 subrows.forEach((sub, subIdx) => {
                     const tr = document.createElement('tr');
+                    // Stripe by logical row so all of a row's sub-rows share one color
+                    if (rowIdx % 2 === 1) tr.classList.add('alt-row');
 
                     currentDataset.columns.forEach(col => {
                         if (col.group && subIdx > 0) return;
