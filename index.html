@@ -77,15 +77,6 @@
             transform: translateY(0);
         }
         
-        button.scramble-btn {
-            background: linear-gradient(135deg, #FF6B9D 0%, #FFA07A 100%);
-            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4);
-        }
-        
-        button.scramble-btn:hover {
-            box-shadow: 0 6px 20px rgba(255, 107, 157, 0.6);
-        }
-        
         button:nth-of-type(1) {
             background: linear-gradient(135deg, #475fff 0%, #5c92ff 100%);
             box-shadow: 0 4px 15px rgba(71, 135, 255, 0.4);
@@ -438,10 +429,8 @@
             <button onclick="document.getElementById('fileInput').click()">📂 Load JSON</button>
             <button onclick="downloadDataset()">⬇️ Download JSON</button>
             <button onclick="useSampleData()">↩ Sample Data</button>
-            <a class="designer-link" href="instructor.html">✏️ Edit in designer</a>
             <input type="file" id="fileInput" accept=".json,application/json" hidden>
         </div>
-
         <div class="difficulty-selector">
             <label for="difficulty">Difficulty:</label>
             <select id="difficulty" onchange="changeDifficulty()">
@@ -479,6 +468,9 @@
         </div>
 
         <div class="source" id="source"></div>
+        <div class="controls">
+            <a class="designer-link" href="instructor.html">✏️ Edit in designer</a>
+        </div>
     </div>
 
     <script src="dataset.js"></script>
