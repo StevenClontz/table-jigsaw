@@ -6,6 +6,8 @@ A drag-and-drop "fill in the table" study game for any table of data. Open `inde
 - **⬇️ Download JSON** saves the current table, which is handy as a starting template.
 - **↩ Sample Data** restores the built-in example.
 
+Placed answers leave the Answer Options list (unless their column is `reusable`). Click a filled blank to send its answer back.
+
 ## Designing tables
 
 Open `instructor.html` (or follow **✏️ Edit in designer** from the game) to build a table without writing JSON:

@@ -268,8 +268,17 @@
             cursor: grabbing;
         }
         
+        /* Non-reusable answers leave the bank once placed (reusable ones never get .used) */
         .draggable-item.used {
-            /* Items stay visible even when used */
+            display: none;
+        }
+
+        #wordBankItems:not(:has(.draggable-item:not(.used)))::after {
+            content: "All answers placed! Click a blank to take its answer back.";
+            display: block;
+            text-align: center;
+            color: #666;
+            font-size: 13px;
         }
         
         .feedback {
